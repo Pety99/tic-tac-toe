@@ -1,4 +1,12 @@
 
+/**
+ * This module stores the game board information
+ */
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
 const gameBoard = (() => {
     let _board = new Array(9);
     const getField = (num) => _board[num];
@@ -8,8 +16,8 @@ const gameBoard = (() => {
      * @param {*} player the player who changes the field
      */
     const setField = (num, player) => {
-        const htmlField = document.querySelector(`.board button:nth-child(${num + 1})`);
-
+        const htmlField = document.querySelector(`.board button:nth-child(${num + 1}) p`);
+        htmlField.classList.add('puff-in-center');
         htmlField.textContent = player.getSign();
         _board[num] = player.getSign();
     }
@@ -50,8 +58,17 @@ const gameBoard = (() => {
 const Player = (sign) => {
     let _sign = sign;
     const getSign = () => _sign;
-    const setSign = (sign) => {
+    const setSign = (sign, active) => {
         _sign = sign;
+        const p = document.querySelector(`.btn-p.${sign.toLowerCase()}`);
+        if(active){
+            p.classList.add('selected');
+            p.classList.remove('not-selected');
+        }
+        else{
+            p.classList.remove('selected');
+            p.classList.add('not-selected');
+        }
     }
     return {
         getSign,
@@ -63,58 +80,72 @@ const minimaxAiLogic = ((percentage) => {
 
     let aiPrecision = percentage;
 
-    const setAiPercentage  = (percentage) => {
+    const setAiPercentage = (percentage) => {
         aiPrecision = percentage;
     }
-    const getAiPercentage = () =>{
+    const getAiPercentage = () => {
         return aiPrecision;
     }
 
+    /**
+     * Chooses the next filed for the AI Player.
+     * The AI player has an 'aiPercentage' value, this function chooses the best move proportionate to that value,
+     * and chooses a random move the rest of the time.
+     * For example if the 'aiPercentage' is 64 then the probability of the best move is 0.64 and the probability of a random move is 0.34
+     */
     const chooseField = () => {
-        const choice = minimax(gameBoard, gameController.getAiPlayer()).index
-        const field = gameBoard.getField(choice);
-        if (field != undefined) {
-            return "error"
-        }
-        return choice;
-    }
-
-
-    const findBestMove = (moves, player) =>{
 
         //random number between 0 and 100
         const value = Math.floor(Math.random() * (100 + 1));
 
         // if the random number is smaller then the ais threshold, it findds the best move
-        if(value <= aiPrecision){
+        let choice = null;
+        if (value <= aiPrecision) {
             console.log('bestChoice');
-            let bestMove;
-            if (player === gameController.getAiPlayer()) {
-                let bestScore = -10000;
-                for (let i = 0; i < moves.length; i++) {
-                    if (moves[i].score > bestScore) {
-                        bestScore = moves[i].score;
-                        bestMove = i;
-                    }
-                }
-            } else {
-                let bestScore = 10000;
-                for (let i = 0; i < moves.length; i++) {
-                    if (moves[i].score < bestScore) {
-                        bestScore = moves[i].score;
-                        bestMove = i;
-                    }
-                }
+            choice = minimax(gameBoard, gameController.getAiPlayer()).index
+            const field = gameBoard.getField(choice);
+            if (field != undefined) {
+                return "error"
             }
-            return moves[bestMove];
         }
-        else{
+        else {
             console.log('NotbestChoice');
-            let noBestMove = Math.floor(Math.random() * moves.length);
-            return(moves[noBestMove]);
+            const emptyFieldsIdx = gameBoard.getEmptyFieldsIdx();
+            let noBestMove = Math.floor(Math.random() * emptyFieldsIdx.length);
+            choice = emptyFieldsIdx[noBestMove];
         }
+        return choice;
     }
 
+
+    const findBestMove = (moves, player) => {
+        let bestMove;
+        if (player === gameController.getAiPlayer()) {
+            let bestScore = -10000;
+            for (let i = 0; i < moves.length; i++) {
+                if (moves[i].score > bestScore) {
+                    bestScore = moves[i].score;
+                    bestMove = i;
+                }
+            }
+        } else {
+            let bestScore = 10000;
+            for (let i = 0; i < moves.length; i++) {
+                if (moves[i].score < bestScore) {
+                    bestScore = moves[i].score;
+                    bestMove = i;
+                }
+            }
+        }
+        return moves[bestMove];
+
+    }
+
+    /**
+     * Returns an object which includes the 'index' and the 'score' of the next best move
+     * @param {gameBoard} newBoard - call it with the gameBoard
+     * @param {player} player - call it with the AI player
+     */
     const minimax = (newBoard, player) => {
 
         let empty = newBoard.getEmptyFieldsIdx();
@@ -165,7 +196,7 @@ const minimaxAiLogic = ((percentage) => {
 
         //find the best move
         return findBestMove(moves, player);
-        
+
     }
     return {
         minimax,
@@ -190,6 +221,11 @@ const gameController = (() => {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
+    /**
+     * Checks if a player has filled a row.
+     * If someone filled a row it returns true, else it returns false.
+     * @param {gameBoard} board - call with the gameBoard
+     */
     const _checkForRows = (board) => {
         for (let i = 0; i < 3; i++) {
             let row = []
@@ -204,6 +240,11 @@ const gameController = (() => {
         return false;
     }
 
+   /**
+     * Checks if a player has filled a column.
+     * If someone filled a column it returns true, else it returns false.
+     * @param {gameBoard} board - call with the gameBoard
+     */
     const _checkForColumns = (board) => {
         for (let i = 0; i < 3; i++) {
             let column = []
@@ -218,6 +259,12 @@ const gameController = (() => {
         return false;
     }
 
+
+    /**
+     * Checks if a player has filled a diagonal.
+     * If someone filled a diagonal it returns true, else it returns false.
+     * @param {gameBoard} board - call with the gameBoard
+     */
     const _checkForDiagonals = (board) => {
         diagonal1 = [board.getField(0), board.getField(4), board.getField(8)];
         diagonal2 = [board.getField(6), board.getField(4), board.getField(2)];
@@ -236,8 +283,13 @@ const gameController = (() => {
         return false;
     }
 
+    /**
+     * Checks if the game is a draw.
+     * If its a draw it returns true, else it returns false.
+     * @param {gameBoard} board 
+     */
     const checkForDraw = (board) => {
-        if(checkForWin(board)){
+        if (checkForWin(board)) {
             return false;
         }
         for (let i = 0; i < 9; i++) {
@@ -249,34 +301,49 @@ const gameController = (() => {
         return true;
     }
 
+    /**
+     * changes the sign of the Human player to 'sing' and the AI players to the other sign.
+     * @param {string} sign - 'X' or 'O'
+     */
     const changeSign = (sign) => {
         if (sign == 'X') {
-            _humanPlayer.setSign('X');
+            _humanPlayer.setSign('X', true);
             _aiPlayer.setSign('O');
         }
         else if (sign == 'O') {
-            _humanPlayer.setSign('O');
+            _humanPlayer.setSign('O', true);
             _aiPlayer.setSign('X');
         }
         else throw 'Incorrect sign';
     }
 
+    /**
+     * Steps the player to the field, and checks if the game has come to an end.
+     * If the game if finished it disables the buttons.
+     * @param {int} num - the index of the field which the player clicked
+     */
     const playerStep = (num) => {
-        filed = gameBoard.getField(num);
-        if (filed == undefined) {
+        const field = gameBoard.getField(num);
+        if (field == undefined) {
             gameBoard.setField(num, _humanPlayer);
             if (checkForWin(gameBoard)) {
-                endGame(_humanPlayer.getSign());
+                (async () => {
+                    await _sleep(500 + (Math.random() * 500));
+                    endGame(_humanPlayer.getSign());
+                })();  
             }
             else if (checkForDraw(gameBoard)) {
-                endGame("Draw");
+                (async () => {
+                    await _sleep(500 + (Math.random() * 500));
+                    endGame("Draw");
+                })();  
             }
             else {
                 displayController.deactivate();
                 (async () => {
                     await _sleep(500 + (Math.random() * 500));
                     aiStep();
-                    if(!checkForWin(gameBoard)) {
+                    if (!checkForWin(gameBoard)) {
                         displayController.activate();
                     }
                 })();
@@ -287,31 +354,69 @@ const gameController = (() => {
         }
     }
 
-    const endGame = (sign) => {
+    
+    /**
+     * 
+     * @param {*} sign 
+     */
+    const endGame = function(sign){
+
+        const card = document.querySelector('.card');
+        card.classList.remove('unblur');
+        card.classList.add('blur');
+
+        const winElements = document.querySelectorAll('.win p')
+
         if (sign == "Draw") {
-            //TODO display draw
+            winElements[3].classList.remove('hide');
             console.log("Its a draw");
         }
         else {
-            //TODO display win
             console.log(`The winner is player ${sign}`);
+            winElements[0].classList.remove('hide');
+            if(sign.toLowerCase() == 'x'){
+                winElements[1].classList.remove('hide');
+            }
+            else{
+                winElements[2].classList.remove('hide');
+            }
         }
         console.log('deactivate');
         displayController.deactivate();
+        displayController.makeBodyRestart();
     }
 
+    /**
+     * Steps the AI.
+     */
     const aiStep = () => {
         const num = _aiLogic.chooseField();
         gameBoard.setField(num, _aiPlayer);
         if (checkForWin(gameBoard)) {
-            endGame(_aiPlayer.getSign())
+            (async () => {
+                await _sleep(500 + (Math.random() * 500));
+                endGame(_aiPlayer.getSign())
+            })();  
+            
         }
         else if (checkForDraw(gameBoard)) {
-            endGame("Draw");
+            (async () => {
+                await _sleep(500 + (Math.random() * 500));
+                endGame("Draw");
+            })();  
         }
     }
 
-    const restart = () => {
+    /**
+     * Restarts the game.
+     */
+    const restart = async function () {
+
+        const card = document.querySelector('.card');
+        const winElements = document.querySelectorAll('.win p');
+
+        card.classList.add('unblur');
+
         gameBoard.clear();
         displayController.clear();
         if (_humanPlayer.getSign() == 'O') {
@@ -320,6 +425,15 @@ const gameController = (() => {
         console.log('restart');
         console.log(minimaxAiLogic.getAiPercentage());
         displayController.activate();
+
+   
+        card.classList.remove('blur');
+      
+        winElements.forEach(element => {
+            element.classList.add('hide');
+        });
+        document.body.removeEventListener('click', gameController.restart);
+
     }
 
     return {
@@ -343,16 +457,16 @@ const displayController = (() => {
 
     const _changeAI = () => {
         const value = document.querySelector('#levels').value;
-        if(value == 'easy'){
+        if (value == 'easy') {
             minimaxAiLogic.setAiPercentage(0);
         }
-        else if(value == 'medium'){
-            minimaxAiLogic.setAiPercentage(95);
+        else if (value == 'medium') {
+            minimaxAiLogic.setAiPercentage(80);
         }
-        else if(value == 'hard'){
-            minimaxAiLogic.setAiPercentage(99.99);
+        else if (value == 'hard') {
+            minimaxAiLogic.setAiPercentage(90);
         }
-        else if(value == 'unbeatable'){
+        else if (value == 'unbeatable') {
             minimaxAiLogic.setAiPercentage(100);
         }
         gameController.restart();
@@ -365,7 +479,9 @@ const displayController = (() => {
 
     const clear = () => {
         htmlBoard.forEach(field => {
-            field.textContent = '';
+            const p = field.childNodes[0];
+            p.classList = [];
+            p.textContent = '';
         });
     }
 
@@ -381,6 +497,12 @@ const displayController = (() => {
 
             field.removeAttribute('disabled');
         });
+    }
+
+    const makeBodyRestart = () =>{
+        const body = document.querySelector('body');
+        body.addEventListener('click', gameController.restart);
+        
     }
 
     const _init = (() => {
@@ -401,6 +523,10 @@ const displayController = (() => {
     return {
         deactivate,
         activate,
-        clear
+        clear,
+        makeBodyRestart
     }
 })();
+
+// To highlight the box at start
+gameController.changeSign('X')

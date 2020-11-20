@@ -1,29 +1,51 @@
 <!DOCTYPE html>
+
 <head>
+    <title>Tic-Tac-Toe</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="animation.css">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;400;500;600;700&display=swap"rel="stylesheet">
 </head>
+
 <body>
-    <form action="" class="form">
-        <select name="levels" id="levels">
-            <option value="easy">Easy</option>
-            <option value="medium">Medium</option>
-            <option value="hard">Hard</option>
-        </select>
-    </form>
-    <button class="btn x">X</button>
-    <button class="btn o">O</button>
-    <div class="board">
-        <button class="field"></button>
-        <button class="field"></button>
-        <button class="field"></button>
-        <button class="field"></button>
-        <button class="field"></button>
-        <button class="field"></button>
-        <button class="field"></button>
-        <button class="field"></button>
-        <button class="field"></button>
+
+    <div class="win">
+        <p class="winner hide">The Winner is</p>
+        <p class="x-text sign hide">X</p>
+        <p class="o-text sign hide">O</p>
+        <p class="winner draw hide">It's a Draw</p>
     </div>
-    <button class="btn restart">Restart</button>
-    
+
+    <div class="card">
+        <div class="item select">
+            <form action="" class="form">
+                <select name="levels" id="levels">
+                    <option value="easy">Easy</option>
+                    <option value="medium">Medium</option>
+                    <option value="hard">Hard</option>
+                    <option value="unbeatable">Unbeatable</option>
+                </select>
+            </form>
+        </div>
+        <div class="item player">
+            <button class="btn btn-p x">X</button>
+            <button class="btn btn-p o">O</button>
+        </div>
+        <div class="item board">
+            <button class="field"><p></p></button>
+            <button class="field"><p></p></button>
+            <button class="field no-r"><p></p></button>
+            <button class="field"><p></p></button>
+            <button class="field"><p></p></button>
+            <button class="field no-r"><p></p></button>
+            <button class="field no-b"><p></p></button>
+            <button class="field no-b"><p></p></button>
+            <button class="field no-b no-r"><p></p></button>
+        </div>
+        <div class="item rst">
+            <button class="btn restart">Restart</button>
+        </div>
+    </div>
 </body>
 <script src="script.js"></script>
