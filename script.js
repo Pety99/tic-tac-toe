@@ -328,7 +328,7 @@ const gameController = (() => {
             gameBoard.setField(num, _humanPlayer);
             if (checkForWin(gameBoard)) {
                 (async () => {
-                    await _sleep(500 + (Math.random() * 500));
+                    await _sleep(550 + (Math.random() * 500));
                     endGame(_humanPlayer.getSign());
                 })();  
             }
@@ -341,7 +341,7 @@ const gameController = (() => {
             else {
                 displayController.deactivate();
                 (async () => {
-                    await _sleep(500 + (Math.random() * 500));
+                    await _sleep(250 + (Math.random() * 300));
                     aiStep();
                     if (!checkForWin(gameBoard)) {
                         displayController.activate();

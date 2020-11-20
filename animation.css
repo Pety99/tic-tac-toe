@@ -1,6 +1,6 @@
 .puff-in-center {
-    -webkit-animation: puff-in-center 0.5s cubic-bezier(0.550, 0.055, 0.675, 0.190) both;
-    animation: puff-in-center 0.5s cubic-bezier(0.550, 0.055, 0.675, 0.190) both;
+    -webkit-animation: puff-in-center 0.35s cubic-bezier(0.550, 0.055, 0.675, 0.190) both;
+    animation: puff-in-center 0.35s cubic-bezier(0.550, 0.055, 0.675, 0.190) both;
 }
 
 /* ----------------------------------------------
@@ -92,7 +92,7 @@
 }
 
 .blur {
-    -webkit-animation: blur 1s;
+    -webkit-animation: blur 0.7s;
     -webkit-animation-fill-mode: forwards;
 }
 
