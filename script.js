@@ -328,7 +328,7 @@ const gameController = (() => {
             gameBoard.setField(num, _humanPlayer);
             if (checkForWin(gameBoard)) {
                 (async () => {
-                    await _sleep(550 + (Math.random() * 500));
+                    await _sleep(500 + (Math.random() * 500));
                     endGame(_humanPlayer.getSign());
                 })();  
             }
