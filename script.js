@@ -461,7 +461,7 @@ const displayController = (() => {
             minimaxAiLogic.setAiPercentage(0);
         }
         else if (value == 'medium') {
-            minimaxAiLogic.setAiPercentage(80);
+            minimaxAiLogic.setAiPercentage(75);
         }
         else if (value == 'hard') {
             minimaxAiLogic.setAiPercentage(90);
